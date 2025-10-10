@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>831</width>
-    <height>675</height>
+    <width>801</width>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -40,7 +40,7 @@
              <enum>QTabWidget::TabShape::Rounded</enum>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>6</number>
             </property>
             <property name="elideMode">
              <enum>Qt::TextElideMode::ElideNone</enum>
@@ -49,36 +49,71 @@
              <attribute name="title">
               <string>盖浇饭</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QListWidget" name="listWidget_0"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_1">
              <attribute name="title">
               <string>凉菜</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item>
+               <widget class="QListWidget" name="listWidget_1"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_2">
              <attribute name="title">
               <string>荤菜</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <item>
+               <widget class="QListWidget" name="listWidget_2"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_3">
              <attribute name="title">
               <string>素菜</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <item>
+               <widget class="QListWidget" name="listWidget_3"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_4">
              <attribute name="title">
               <string>甜点</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_10">
+              <item>
+               <widget class="QListWidget" name="listWidget_4"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_5">
              <attribute name="title">
               <string>饮品</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <widget class="QListWidget" name="listWidget_5"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_6">
              <attribute name="title">
               <string>其他</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_12">
+              <item>
+               <widget class="QListWidget" name="listWidget_6"/>
+              </item>
+             </layout>
             </widget>
            </widget>
           </item>
@@ -108,7 +143,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QListView" name="listView"/>
+           <widget class="QListWidget" name="listWidget_a"/>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_1">
@@ -157,36 +192,71 @@
              <attribute name="title">
               <string>盖浇饭</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_17">
+              <item>
+               <widget class="QListWidget" name="listWidget_7"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_8">
              <attribute name="title">
               <string>凉菜</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_19">
+              <item>
+               <widget class="QListWidget" name="listWidget_8"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_9">
              <attribute name="title">
               <string>荤菜</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_18">
+              <item>
+               <widget class="QListWidget" name="listWidget_9"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_10">
              <attribute name="title">
               <string>素菜</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <item>
+               <widget class="QListWidget" name="listWidget_10"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_11">
              <attribute name="title">
               <string>甜点</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_14">
+              <item>
+               <widget class="QListWidget" name="listWidget_11"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_12">
              <attribute name="title">
               <string>饮品</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_15">
+              <item>
+               <widget class="QListWidget" name="listWidget_12"/>
+              </item>
+             </layout>
             </widget>
             <widget class="QWidget" name="tab_13">
              <attribute name="title">
               <string>其他</string>
              </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_16">
+              <item>
+               <widget class="QListWidget" name="listWidget_13"/>
+              </item>
+             </layout>
             </widget>
            </widget>
           </item>
@@ -209,7 +279,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <widget class="QListView" name="listView_2"/>
+           <widget class="QListWidget" name="listWidget_b"/>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_4">
@@ -231,7 +301,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>831</width>
+     <width>801</width>
      <height>21</height>
     </rect>
    </property>
