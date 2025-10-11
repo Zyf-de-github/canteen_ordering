@@ -18,6 +18,8 @@
 #include <QStandardItemModel>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QtCharts>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -26,24 +28,27 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-struct Dish//菜品数据结构
+// 菜品数据结构
+struct Dish
 {
-    QString name;//菜名
-    double price;//价格
-    QString desc;//描述
-    QString category;//菜品种类
+    QString name;      // 菜名
+    double price;      // 价格
+    QString desc;      // 描述
+    QString category;  // 菜品种类
 };
 
-struct Shopping//购物车数据结构
+// 购物车数据结构
+struct Shopping
 {
-    QString name;//菜名
-    double price;//价格
+    QString name;  // 菜名
+    double price;  // 价格
 };
 
-struct Order//订单数据结构
+// 订单数据结构
+struct Order
 {
-    QString name;//菜名
-    int times;//订单号
+    QString name;  // 菜名
+    int times;     // 订单号
 };
 
 class MainWindow : public QMainWindow
@@ -60,11 +65,13 @@ class MainWindow : public QMainWindow
     QMap<QString, QListWidget*> menuWidgets;   // 顾客界面菜单
     QMap<QString, QListWidget*> adminWidgets;  // 管理员界面菜单
 
-    QList<Dish> dishes;   // 所以菜品容器
-    QList<Shopping> shoppings;
-    QList<Order> orders;  // 购物车容器
+    QList<Dish> dishes;         // 所以菜品容器
+    QList<Shopping> shoppings;  // 购物车容器
+    QList<Order> orders;        // 订单容器
 
-    int orderNumbers;
+    // 统计数据
+    int orderNumbers;  // 订单号
+    int totalEarn;     // 总收入
 
     // 菜品文件操作
     void loadDishes();
@@ -73,7 +80,7 @@ class MainWindow : public QMainWindow
     // 刷新界面
     void refreshMenu();
     void refreshShopping();
-    void refreshAdminOrders();//更新购物车
+    void refreshAdminOrders();  // 更新购物车
 
    private slots:
     // 顾客操作
@@ -86,9 +93,13 @@ class MainWindow : public QMainWindow
     void onAdminDeleteDish();
     void onAdminRemoveOrder();
 
-    // 管理员登录/退出
-    void onAdminLogin();
-    void onAdminLogout();
+    // 页面切换
+    void onAdminAdmin();
+    void onAdminClient();
+    void onAdminAnalysis();
+
+    //绘图分析
+    void setupCharts();
 };
 
 #endif  // MAINWINDOW_H
