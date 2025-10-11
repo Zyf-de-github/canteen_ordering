@@ -41,13 +41,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                     {"甜点", ui->listWidget_11},  {"饮品", ui->listWidget_12},
                     {"其他", ui->listWidget_13}};
 
+    //重置订单数
+    orderNumbers=1;
+
     // 加载菜品文件
     loadDishes();
     refreshMenu();
 
     // 顾客界面按钮
-    connect(ui->pushButton_0, &QPushButton::clicked, this, &MainWindow::onAddToCart);
-    connect(ui->pushButton_1, &QPushButton::clicked, this, &MainWindow::onRemoveFromCart);
+    connect(ui->pushButton_0, &QPushButton::clicked, this, &MainWindow::onAddToShopping);
+    connect(ui->pushButton_1, &QPushButton::clicked, this, &MainWindow::onRemoveFromShopping);
     connect(ui->pushButton_2, &QPushButton::clicked, this, &MainWindow::onCheckout);
 
     // 管理员界面按钮
@@ -66,6 +69,7 @@ MainWindow::~MainWindow()
 }
 
 // -------------------- 菜品文件操作 --------------------
+//从文件中加载菜单
 void MainWindow::loadDishes()
 {
     dishes.clear();
@@ -90,6 +94,7 @@ void MainWindow::loadDishes()
     file.close();
 }
 
+//修改菜单后保存菜单
 void MainWindow::saveDishes()
 {
     QFile file("dishes.txt");
@@ -104,13 +109,12 @@ void MainWindow::saveDishes()
 }
 
 // -------------------- 刷新界面 --------------------
+//刷新菜单界面
 void MainWindow::refreshMenu()
 {
-    // 清空所有列表
     for (auto w : menuWidgets) w->clear();
     for (auto w : adminWidgets) w->clear();
 
-    // 添加菜品到顾客界面和管理员界面
     for (const Dish& d : dishes)
     {
         if (menuWidgets.contains(d.category))
@@ -121,29 +125,31 @@ void MainWindow::refreshMenu()
     }
 }
 
-void MainWindow::refreshCart()
+//刷新购物车菜品
+void MainWindow::refreshShopping()
 {
     ui->listWidget_a->clear();
     double total = 0;
-    for (const Order& o : orders)
+    for (const Shopping& S : shoppings)
     {
-        ui->listWidget_a->addItem(o.name + "  ¥" + QString::number(o.price, 'f', 2));
-        total += o.price;
+        ui->listWidget_a->addItem(S.name + "  ¥" + QString::number(S.price, 'f', 2));
+        total += S.price;
     }
     ui->lineEdit->setText(QString::number(total, 'f', 2));
 }
 
+//刷新后台订单
 void MainWindow::refreshAdminOrders()
 {
     ui->listWidget_b->clear();
     for (const Order& o : orders)
     {
-        ui->listWidget_b->addItem(o.name + "  ¥" + QString::number(o.price, 'f', 2));
+        ui->listWidget_b->addItem(o.name + "  订单号：" + QString::number(o.times));
     }
 }
 
 // -------------------- 顾客操作 --------------------
-void MainWindow::onAddToCart()
+void MainWindow::onAddToShopping()
 {
     QWidget* currentTab = ui->tabWidget->currentWidget();
     QListWidget* list = currentTab->findChild<QListWidget*>();
@@ -156,11 +162,12 @@ void MainWindow::onAddToCart()
     QString name = text.section("  ¥", 0, 0);
     double price = text.section("  ¥", 1, 1).toDouble();
 
-    orders.append({name, price});
-    refreshCart();
+    shoppings.append({name, price});
+    orders.append({name,orderNumbers});
+    refreshShopping();
 }
 
-void MainWindow::onRemoveFromCart()
+void MainWindow::onRemoveFromShopping()
 {
     QListWidgetItem* item = ui->listWidget_a->currentItem();
     if (!item) return;
@@ -168,6 +175,14 @@ void MainWindow::onRemoveFromCart()
     QString text = item->text();
     QString name = text.section("  ¥", 0, 0);
 
+    for (int i = 0; i < shoppings.size(); ++i)
+    {
+        if (shoppings[i].name == name)
+        {
+            shoppings.remove(i);
+            break;
+        }
+    }
     for (int i = 0; i < orders.size(); ++i)
     {
         if (orders[i].name == name)
@@ -176,16 +191,17 @@ void MainWindow::onRemoveFromCart()
             break;
         }
     }
-    refreshCart();
+    refreshShopping();
 }
 
 void MainWindow::onCheckout()
 {
-    if (orders.isEmpty()) return;
+    if (shoppings.isEmpty()) return;
 
     refreshAdminOrders();
-    orders.clear();
-    refreshCart();
+    shoppings.clear();
+    refreshShopping();
+    orderNumbers++;
 }
 
 // -------------------- 管理员操作 --------------------
@@ -241,7 +257,7 @@ void MainWindow::onAdminRemoveOrder()
     if (!item) return;
 
     QString text = item->text();
-    QString name = text.section("  ¥", 0, 0);
+    QString name = text.section("  订单号：", 0, 0);
 
     for (int i = 0; i < orders.size(); ++i)
     {
@@ -258,8 +274,7 @@ void MainWindow::onAdminRemoveOrder()
 void MainWindow::onAdminLogin()
 {
     bool ok;
-    QString password =
-        QInputDialog::getText(this, "管理员登录", "请输入密码", QLineEdit::Password, "", &ok);
+    QString password = QInputDialog::getText(this, "管理员登录", "请输入密码", QLineEdit::Password, "", &ok);
     if (!ok) return;
 
     if (password == "123456")

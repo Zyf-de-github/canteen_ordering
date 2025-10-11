@@ -26,18 +26,24 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-struct Dish
+struct Dish//菜品数据结构
 {
-    QString name;
-    double price;
-    QString desc;
-    QString category;
+    QString name;//菜名
+    double price;//价格
+    QString desc;//描述
+    QString category;//菜品种类
 };
 
-struct Order
+struct Shopping//购物车数据结构
 {
-    QString name;
-    double price;
+    QString name;//菜名
+    double price;//价格
+};
+
+struct Order//订单数据结构
+{
+    QString name;//菜名
+    int times;//订单号
 };
 
 class MainWindow : public QMainWindow
@@ -54,8 +60,11 @@ class MainWindow : public QMainWindow
     QMap<QString, QListWidget*> menuWidgets;   // 顾客界面菜单
     QMap<QString, QListWidget*> adminWidgets;  // 管理员界面菜单
 
-    QList<Dish> dishes;   // 所有菜品
-    QList<Order> orders;  // 当前购物车订单
+    QList<Dish> dishes;   // 所以菜品容器
+    QList<Shopping> shoppings;
+    QList<Order> orders;  // 购物车容器
+
+    int orderNumbers;
 
     // 菜品文件操作
     void loadDishes();
@@ -63,13 +72,13 @@ class MainWindow : public QMainWindow
 
     // 刷新界面
     void refreshMenu();
-    void refreshCart();
-    void refreshAdminOrders();
+    void refreshShopping();
+    void refreshAdminOrders();//更新购物车
 
    private slots:
     // 顾客操作
-    void onAddToCart();
-    void onRemoveFromCart();
+    void onAddToShopping();
+    void onRemoveFromShopping();
     void onCheckout();
 
     // 管理员操作
