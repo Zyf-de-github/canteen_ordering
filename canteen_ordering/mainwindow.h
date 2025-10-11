@@ -20,7 +20,6 @@
 #include <QVBoxLayout>
 #include <QtCharts>
 
-
 QT_BEGIN_NAMESPACE
 namespace Ui
 {
@@ -49,6 +48,15 @@ struct Order
 {
     QString name;  // 菜名
     int times;     // 订单号
+};
+
+// 分析数据
+struct analysisData
+{
+    QString dishName;  // 菜名
+    double price;      // 价格
+    int dayIndex;      // 当天编号
+    QDateTime time;    // 下单时间
 };
 
 class MainWindow : public QMainWindow
@@ -82,6 +90,9 @@ class MainWindow : public QMainWindow
     void refreshShopping();
     void refreshAdminOrders();  // 更新购物车
 
+    // 绘图分析
+    void setupCharts();
+
    private slots:
     // 顾客操作
     void onAddToShopping();
@@ -97,9 +108,6 @@ class MainWindow : public QMainWindow
     void onAdminAdmin();
     void onAdminClient();
     void onAdminAnalysis();
-
-    //绘图分析
-    void setupCharts();
 };
 
 #endif  // MAINWINDOW_H

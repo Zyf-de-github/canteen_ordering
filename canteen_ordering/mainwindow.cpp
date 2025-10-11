@@ -1,5 +1,8 @@
 
-#define PASSWORD "123456"  // 登录密码
+#define PASSWORD "123456"             // 登录密码
+#define SHOWDAYS 40                   // 分析数据的最大天数
+#define ANALYSISDATAS "analysis.txt"  // 分析数据文件
+#define DISHES "dishes.txt"           // 菜单文件
 
 #include "mainwindow.h"
 
@@ -57,7 +60,7 @@ MainWindow::~MainWindow()
 void MainWindow::loadDishes()
 {
     dishes.clear();
-    QFile file("dishes.txt");
+    QFile file(DISHES);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return;
 
     QTextStream in(&file);
@@ -185,9 +188,21 @@ void MainWindow::onCheckout()
 {
     if (shoppings.isEmpty()) return;
     double total = 0;
+
+    QFile file(ANALYSISDATAS);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) return;
+    QTextStream out(&file);
+
+    QDateTime now = QDateTime::currentDateTime();      // 获取当前时间
+    QString timeStr = now.toString("yyyy/M/d/h/m/s");  // 格式化为 2025/10/11/14/15/22
+
     for (const Shopping& S : shoppings)
     {
         ui->listWidget_a->addItem(S.name + "  ¥" + QString::number(S.price, 'f', 2));
+
+        out << S.name << " " << S.price << " " << orderNumbers << " " << timeStr
+            << "\n";  // 写入当前时间
+
         total += S.price;
     }
     totalEarn += total;
@@ -269,19 +284,54 @@ void MainWindow::onAdminRemoveOrder()
 }
 
 // -------------------- 数据分析 --------------------
+// 文件读取
+QList<analysisData> readAnalysisData(const QString& filename)
+{
+    QList<analysisData> datas;
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) return datas;
+
+    QTextStream in(&file);
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        QStringList parts = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+        if (parts.size() >= 4)
+        {
+            analysisData d;
+            d.dishName = parts[0];
+            d.price = parts[1].toDouble();
+            d.dayIndex = parts[2].toInt();
+            d.time = QDateTime::fromString(parts[3], "yyyy/M/d/h/m/s");
+            datas.append(d);
+        }
+    }
+    file.close();
+    return datas;
+}
+
+// 绘制图像
 void MainWindow::setupCharts()
 {
-    // 热门菜品
+    QString filename = ANALYSISDATAS;
+    QList<analysisData> datas = readAnalysisData(filename);
+
+    // ---- 热门菜品 ----
+    QMap<QString, int> dishCount;
+    for (const auto& d : datas)
+    {
+        dishCount[d.dishName]++;
+    }
+
     QPieSeries* pieSeries = new QPieSeries();
-    pieSeries->append("红烧肉", 35);
-    pieSeries->append("宫保鸡丁", 25);
-    pieSeries->append("拍黄瓜", 15);
-    pieSeries->append("米饭", 25);
+    for (auto it = dishCount.begin(); it != dishCount.end(); ++it)
+    {
+        pieSeries->append(it.key(), it.value());
+    }
     pieSeries->setLabelsVisible(true);
 
     QChart* pieChart = new QChart();
     pieChart->addSeries(pieSeries);
-    pieChart->setTitle("热门菜品占比");
 
     QChartView* pieView = new QChartView(pieChart);
     pieView->setRenderHint(QPainter::Antialiasing);
@@ -290,27 +340,37 @@ void MainWindow::setupCharts()
     layoutPie->addWidget(pieView);
     layoutPie->setContentsMargins(0, 0, 0, 0);
 
-    // 热门时间段
-    QBarSet* set = new QBarSet("下单数");
-    *set << 2 << 5 << 8 << 10 << 12 << 6 << 3 << 1;
+    // ---- 下单人数 ----
+    QMap<int, int> hourCount;
+    for (const auto& d : datas)
+    {
+        int h = d.time.time().hour();
+        hourCount[h]++;
+    }
 
+    QBarSet* set = new QBarSet("下单数");
     QBarSeries* barSeries = new QBarSeries();
+
+    QStringList hours;
+    for (int h = 0; h < 24; ++h)
+    {
+        *set << hourCount.value(h, 0);
+        hours << QString::number(h) + "点";
+    }
     barSeries->append(set);
 
     QChart* barChart = new QChart();
     barChart->addSeries(barSeries);
-    barChart->setTitle("小时内下单数");
 
-    QStringList hours = {"8点", "9点", "10点", "11点", "12点", "13点", "14点", "15点"};
-    QBarCategoryAxis* axisX = new QBarCategoryAxis();
-    axisX->append(hours);
-    barChart->addAxis(axisX, Qt::AlignBottom);
-    barSeries->attachAxis(axisX);
+    QBarCategoryAxis* barAxisX = new QBarCategoryAxis();
+    barAxisX->append(hours);
+    barChart->addAxis(barAxisX, Qt::AlignBottom);
+    barSeries->attachAxis(barAxisX);
 
-    QValueAxis* axisY = new QValueAxis();
-    axisY->setTitleText("下单数");
-    barChart->addAxis(axisY, Qt::AlignLeft);
-    barSeries->attachAxis(axisY);
+    QValueAxis* barAxisY = new QValueAxis();
+    barAxisY->setTitleText("订单数");
+    barChart->addAxis(barAxisY, Qt::AlignLeft);
+    barSeries->attachAxis(barAxisY);
 
     QChartView* barView = new QChartView(barChart);
     barView->setRenderHint(QPainter::Antialiasing);
@@ -319,23 +379,60 @@ void MainWindow::setupCharts()
     layoutBar->addWidget(barView);
     layoutBar->setContentsMargins(0, 0, 0, 0);
 
-    // 营收折线图
-    QLineSeries* lineSeries = new QLineSeries();
-    QList<double> revenue = {1200, 1500, 1800, 2000, 2300, 2600, 3100};
-    QStringList days = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    // ---- 营收曲线 ----
+    // 统计最近20天的每日营收
+    QDate today = QDate::currentDate();
+    QDate startDate = today.addDays(-SHOWDAYS + 1);
 
-    for (int i = 0; i < revenue.size(); ++i) lineSeries->append(i, revenue[i]);
+    QMap<QDate, double> dailyRevenue;
+
+    for (int i = 0; i < SHOWDAYS; ++i)
+    {
+        dailyRevenue[startDate.addDays(i)] = 0.0;
+    }
+
+    // 遍历订单数据，累加到对应日期
+    for (const auto& d : datas)
+    {
+        QDate orderDate = d.time.date();
+        if (orderDate >= startDate && orderDate <= today)
+        {
+            dailyRevenue[orderDate] += d.price;
+        }
+    }
+
+    // 排序日期
+    QList<QDate> sortedDates = dailyRevenue.keys();
+    std::sort(sortedDates.begin(), sortedDates.end());
+
+    // 创建折线图
+    QLineSeries* lineSeries = new QLineSeries();
+    QStringList dayLabels;
+    for (int i = 0; i < sortedDates.size(); ++i)
+    {
+        QDate date = sortedDates[i];
+        lineSeries->append(i, dailyRevenue[date]);
+        dayLabels << date.toString("MM/dd");  // X轴显示为月/日
+    }
 
     QChart* lineChart = new QChart();
     lineChart->addSeries(lineSeries);
-    lineChart->setTitle("每日营收趋势");
-    lineChart->createDefaultAxes();
 
-    QCategoryAxis* axisX2 = new QCategoryAxis();
-    for (int i = 0; i < days.size(); ++i) axisX2->append(days[i], i);
-    lineChart->addAxis(axisX2, Qt::AlignBottom);
-    lineSeries->attachAxis(axisX2);
+    // X轴
+    QCategoryAxis* lineAxisX = new QCategoryAxis();
+    for (int i = 0; i < dayLabels.size(); ++i) lineAxisX->append(dayLabels[i], i);
 
+    // Y轴
+    QValueAxis* lineAxisY = new QValueAxis();
+    lineAxisY->setTitleText("营收");
+
+    lineChart->addAxis(lineAxisX, Qt::AlignBottom);
+    lineChart->addAxis(lineAxisY, Qt::AlignLeft);
+
+    lineSeries->attachAxis(lineAxisX);
+    lineSeries->attachAxis(lineAxisY);
+
+    // 显示在界面上
     QChartView* lineView = new QChartView(lineChart);
     lineView->setRenderHint(QPainter::Antialiasing);
 

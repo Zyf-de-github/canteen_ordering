@@ -359,7 +359,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,1">
+         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,2">
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_21" stretch="1,10">
             <item>
@@ -402,7 +402,7 @@
      <x>0</x>
      <y>0</y>
      <width>794</width>
-     <height>17</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menud">
