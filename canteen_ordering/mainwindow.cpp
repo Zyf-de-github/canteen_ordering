@@ -5,15 +5,20 @@
 #define DISHES "dishes.txt"           // 菜单文件
 
 #include "mainwindow.h"
-
+#include "paydialog.h"
 #include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
+    // 重置订单数
+    orderNumbers = 1;
+    totalEarn = 0;
+
     // 默认显示用户界面
     ui->stackedWidget->setCurrentIndex(0);
+    ui->lineEdit_4->setText(QString("订单号为%1的顾客，你好。").arg(orderNumbers));
 
     // 初始化菜单 tab 对应 widget
     menuWidgets = {{"盖浇饭", ui->listWidget_0}, {"凉菜", ui->listWidget_1},
@@ -26,9 +31,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                     {"甜点", ui->listWidget_11},  {"饮品", ui->listWidget_12},
                     {"其他", ui->listWidget_13}};
 
-    // 重置订单数
-    orderNumbers = 1;
-    totalEarn = 0;
 
     // 加载菜品文件
     loadDishes();
@@ -188,7 +190,11 @@ void MainWindow::onCheckout()
 {
     if (shoppings.isEmpty()) return;
     double total = 0;
-
+    for (const Shopping& S : shoppings)
+    {
+        total += S.price;
+    }
+    if(!payWindow(total))return;
     QFile file(ANALYSISDATAS);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)) return;
     QTextStream out(&file);
@@ -202,10 +208,9 @@ void MainWindow::onCheckout()
 
         out << S.name << " " << S.price << " " << orderNumbers << " " << timeStr
             << "\n";  // 写入当前时间
-
-        total += S.price;
     }
     totalEarn += total;
+    ui->lineEdit_4->setText(QString("订单号为%1的顾客，你好。").arg(orderNumbers));
     ui->lineEdit_3->setText(QString::number(totalEarn, 'f', 2));
     ui->lineEdit_2->setText(QString::number(orderNumbers));
     refreshAdminOrders();
@@ -407,6 +412,7 @@ void MainWindow::setupCharts()
 
     // 创建折线图
     QLineSeries* lineSeries = new QLineSeries();
+    lineSeries->setName("每日营收");
     QStringList dayLabels;
     for (int i = 0; i < sortedDates.size(); ++i)
     {
@@ -486,4 +492,22 @@ void MainWindow::onAdminClient()
 {
     ui->stackedWidget->setCurrentIndex(0);
     QMessageBox::information(this, "顾客模式", "已进入点餐界面");
+}
+
+//二维码付款
+bool MainWindow::payWindow(double totalMoney)
+{
+    PayDialog dlg(this,totalMoney);
+    int result = dlg.exec();  // 以模态方式显示
+
+    if (result == QDialog::Accepted)
+    {
+        QMessageBox::information(this, "支付成功", "感谢消费！");
+        return true;
+    }
+    else
+    {
+        QMessageBox::information(this, "已取消", "支付未完成。");
+        return false;
+    }
 }

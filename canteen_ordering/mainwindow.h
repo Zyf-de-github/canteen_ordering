@@ -93,6 +93,8 @@ class MainWindow : public QMainWindow
     // 绘图分析
     void setupCharts();
 
+    //付款界面
+    bool payWindow(double totalMoney);
    private slots:
     // 顾客操作
     void onAddToShopping();
@@ -108,6 +110,7 @@ class MainWindow : public QMainWindow
     void onAdminAdmin();
     void onAdminClient();
     void onAdminAnalysis();
+
 };
 
 #endif  // MAINWINDOW_H
